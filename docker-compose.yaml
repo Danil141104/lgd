@@ -1,0 +1,32 @@
+services:
+  webserver:
+    container_name: "webserver"
+    restart: unless-stopped
+    build:
+      context: ./webserver
+    env_file: ".env"
+    depends_on:
+      - rabbitmq
+    ports:
+      - 80:80
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    env_file: ".env"
+    container_name: "rabbitmq"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - ./rabbitmq/data/:/var/lib/rabbitmq/
+      - ./rabbitmq/log/:/var/log/rabbitmq/
+
+  ml_model:
+    container_name: "ml_model"
+    restart: unless-stopped
+    build:
+      context: ./ml_model
+    env_file: ".env"
+    depends_on:
+      - rabbitmq
+      - webserver
